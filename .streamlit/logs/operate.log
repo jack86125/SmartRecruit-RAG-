@@ -1,0 +1,20 @@
+
+#快速下载大模型
+C:\Users\lidat>git lfs install
+Git LFS initialized.
+
+C:\Users\lidat>d:
+
+D:\>cd D:\LLM_Codes\Chapter3_RAG\models
+
+D:\LLM_Codes\Chapter3_RAG\models>git clone https://www.modelscope.cn/Qwen/Qwen2.5-7B-Instruct.git
+Cloning into 'Qwen2.5-7B-Instruct'...
+remote: Enumerating objects: 45, done.
+remote: Counting objects: 100% (45/45), done.
+remote: Compressing objects: 100% (27/27), done.
+remote: Total 45 (delta 16), reused 45 (delta 16), pack-reused 0
+Receiving objects: 100% (45/45), 3.60 MiB | 2.40 MiB/s, done.
+Resolving deltas: 100% (16/16), done.
+Updating files: 100% (15/15), done.
+
+
