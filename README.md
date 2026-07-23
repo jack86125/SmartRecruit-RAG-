@@ -239,6 +239,12 @@ docker run -d --name elasticsearch -p 9200:9200 \
 pip install -r requirements.txt
 ```
 
+> ⚠️ **版本兼容性说明**：
+> 如果启动时遇到 `TypeError: XLMRobertaModel.__init__() got an unexpected keyword argument 'dtype'` 错误，是 `transformers` 和 `FlagEmbedding` 版本不兼容导致。执行以下命令修复：
+> ```bash
+> pip install --upgrade FlagEmbedding "transformers>=5.0"
+> ```
+
 ### 第三步：下载模型文件
 
 > ⚠️ **重要**：由于 GitHub 上传大小限制，项目中 `models/` 目录不包含模型权重文件，需要自行下载。
@@ -339,6 +345,88 @@ streamlit run app.py --server.port 8501
 7. **结构化简历提取** — LLM 从原始简历中提取姓名、性别、年龄、工作经验等字段，存入 Milvus 标量字段，支持过滤查询
 8. **Agent 上下文管理** — 多轮对话中自动维护当前候选人列表，追问时只需指代"第一个"、"他们"等
 9. **多编码兼容** — 对 `.txt` 文件依次尝试 UTF-8、GBK、Latin-1 编码，稳定处理中文文本
+
+---
+
+## 🖥 服务器部署
+
+### 环境准备
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/jack86125/SmartRecruit-RAG-.git
+cd SmartRecruit-RAG-
+
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 如遇版本兼容性问题，升级关键包
+pip install --upgrade FlagEmbedding "transformers>=5.0"
+```
+
+### 模型下载
+
+由于 GitHub 限制，模型文件需单独下载：
+
+```bash
+# 使用 HuggingFace（需科学上网）
+huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
+huggingface-cli download BAAI/bge-reranker-base --local-dir models/bge-reranker-base
+
+# 国内用户可用镜像
+# export HF_ENDPOINT=https://hf-mirror.com
+# huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
+```
+
+### 启动 Docker 基础设施
+
+```bash
+# Milvus Standalone
+docker-compose -f /path/to/milvus-standalone/docker-compose.yml up -d
+
+# MongoDB
+docker run -d --name mongodb -p 27017:27017 \
+  -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=123456 \
+  mongo:7
+
+# Elasticsearch
+docker run -d --name elasticsearch -p 9200:9200 \
+  -e "discovery.type=single-node" \
+  -e "xpack.security.enabled=false" \
+  elasticsearch:8.14.0
+```
+
+### 配置 API Key
+
+在 `config.py` 中修改或通过环境变量设置：
+
+```python
+DASHSCOPE_API_KEY: str = "your-api-key-here"  # 替换为你的 DashScope API Key
+```
+
+### 导入数据并启动
+
+```bash
+# 导入 sample 简历
+python system_data_init.py
+
+# 后台运行（推荐生产环境使用 nohup 或 tmux）
+nohup streamlit run app.py --server.port 8501 --server.address 0.0.0.0 > app.log 2>&1 &
+
+# 或直接前台运行
+streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+```
+
+### 验证服务
+
+```bash
+# 检查端口
+netstat -tlnp | grep 8501
+
+# 测试接口
+curl -s http://localhost:8501 | head -5
+```
 
 ---
 
