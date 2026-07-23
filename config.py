@@ -1,4 +1,3 @@
-# info.py.py
 import os
 from pydantic import BaseModel, Field
 
@@ -36,7 +35,7 @@ class Config(BaseModel):
                                 description="重排序模型")
 
     # API 密钥
-    DASHSCOPE_API_KEY: str = Field(default="sk-efb99a61e2dc4676be0781f5f6949a1b", description="DashScope API 密钥")
+    DASHSCOPE_API_KEY: str = Field(default_factory=lambda: os.getenv("DASHSCOPE_API_KEY", ""), description="DashScope API 密钥")
 
     # 本地简历路径
     LOCAL_RESUME_DIR: str = Field(default="data/resume",
